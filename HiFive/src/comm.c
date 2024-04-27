@@ -19,33 +19,34 @@ void auto_brake(int devid)
     d <= 60cm               Must stop           Flashing red (100ms blinks)
     */
 
-    uint8_t dist_L = 0;
+    uint8_t dist_L = 0;     //Declare variables for reading distance
     uint8_t dist_H = 0;
     uint16_t dist = 0;
-    while (1) {
-        if ('Y' == ser_read(devid) && 'Y' == ser_read(devid)) {
+    while (1) {             //Infinite loop
+                            //Checks two consecutive bytes for serial device (devid)
+        if ('Y' == ser_read(devid) && 'Y' == ser_read(devid)) {         
 
-            dist_L = ser_read(devid);
-            dist_H = ser_read(devid);
-            dist = (dist_H << 8) | dist_L;
+            dist_L = ser_read(devid);       //reads one byte
+            dist_H = ser_read(devid);       //reads another byte
+            dist = (dist_H << 8) | dist_L;  //combines high/low bytes
 
-            if (dist > 200) {
+            if (dist > 200) {                           //if distance is greater than 200 cm, green light
                 gpio_write(GREEN_LED, ON);
                 gpio_write(RED_LED, OFF);
-            } else if (200 > dist && dist >= 100) {
+            } else if (200 > dist && dist >= 100) {     //if distance is less than 200 cm and greater than or equal to 100 cm, yellow light
                 gpio_write(GREEN_LED, ON);
                 gpio_write(RED_LED, ON);
-            } else if (100 > dist && dist > 60) {
+            } else if (100 > dist && dist >= 60) {       //if distance is less than 100 cm and greater than or equal to 60 cm, red light
                 gpio_write(GREEN_LED, OFF);
                 gpio_write(RED_LED, ON);
-            } else {
+            } else {                                    //if distance is less than 60 cm, flashing red
                 gpio_write(GREEN_LED, OFF);
                 gpio_write(RED_LED, ON);
                 delay(100);
                 gpio_write(RED_LED, OFF);
                 delay(100);
             }
-            printf("d = %d \n", dist);
+            printf("d = %d \n", dist);                  //prints distance as read
         }
     }
 }
@@ -73,15 +74,16 @@ void steering(int gpio, int pos)
     // Task-3: 
     // Your code goes here (Use Lab 05 for reference)
     // Check the project document to understand the task
-    int SERVO_PULSE_MAX = 2400;
+    int SERVO_PULSE_MAX = 2400;     //Declare servo motor variables
     int SERVO_PULSE_MIN = 544;
     int SERVO_PERIOD = 20000;
 
+    //Calculates pulse width based on position
    int pulse = (((SERVO_PULSE_MAX - SERVO_PULSE_MIN)*pos) / 180) + SERVO_PULSE_MIN;
-   gpio_write(gpio, ON);
-   delay_usec(pulse);
-   gpio_write(gpio, OFF);
-   delay_usec(SERVO_PERIOD - pulse);
+   gpio_write(gpio, ON);    //signals pulse
+   delay_usec(pulse);       //delays execution
+   gpio_write(gpio, OFF);   //ends pulse
+   delay_usec(SERVO_PERIOD - pulse);    //delays execution for remaining time in signal period
 }
 
 int main() { 
